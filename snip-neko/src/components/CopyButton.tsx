@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 
 interface CopyButtonProps {
@@ -10,6 +10,11 @@ interface CopyButtonProps {
 
 export function CopyButton({ text, className }: CopyButtonProps) {
   const [copied, setCopied] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleCopy = async () => {
     try {
@@ -19,6 +24,15 @@ export function CopyButton({ text, className }: CopyButtonProps) {
     } catch (err) {
       console.error('Failed to copy text:', err)
     }
+  }
+
+  // Don't render until mounted to avoid hydration issues
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="sm" className={className} disabled>
+        📋 Copy
+      </Button>
+    )
   }
 
   return (

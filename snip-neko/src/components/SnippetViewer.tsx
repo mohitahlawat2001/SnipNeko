@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -14,6 +14,20 @@ interface SnippetViewerProps {
 
 export default function SnippetViewer({ snippet }: SnippetViewerProps) {
   const [showRaw, setShowRaw] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [timeRemaining, setTimeRemaining] = useState('')
+
+  // Fix hydration by only showing dynamic content after mount
+  useEffect(() => {
+    setMounted(true)
+    setTimeRemaining(timeUntilExpiry(new Date(snippet.expiresAt)))
+    
+    const interval = setInterval(() => {
+      setTimeRemaining(timeUntilExpiry(new Date(snippet.expiresAt)))
+    }, 60000) // Update every minute
+
+    return () => clearInterval(interval)
+  }, [snippet.expiresAt])
 
   const isExpired = new Date(snippet.expiresAt) < new Date()
 
@@ -45,9 +59,11 @@ export default function SnippetViewer({ snippet }: SnippetViewerProps) {
             <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
               <span>Language: {snippet.language || 'text'}</span>
               <span>Created: {formatDate(new Date(snippet.createdAt))}</span>
-              <span className="text-orange-600 font-medium">
-                {timeUntilExpiry(new Date(snippet.expiresAt))}
-              </span>
+              {mounted && (
+                <span className="text-orange-600 font-medium">
+                  {timeRemaining}
+                </span>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -97,16 +113,18 @@ export default function SnippetViewer({ snippet }: SnippetViewerProps) {
           </Link>
           
           <div className="flex gap-2">
-            <Button
-              onClick={() => {
-                const url = window.location.href
-                navigator.clipboard.writeText(url)
-              }}
-              variant="outline"
-              size="sm"
-            >
-              📋 Copy URL
-            </Button>
+            {mounted && (
+              <Button
+                onClick={() => {
+                  const url = window.location.href
+                  navigator.clipboard.writeText(url)
+                }}
+                variant="outline"
+                size="sm"
+              >
+                📋 Copy URL
+              </Button>
+            )}
           </div>
         </div>
       </Card>
