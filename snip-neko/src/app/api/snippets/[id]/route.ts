@@ -2,28 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Snippet } from '@/models/Snippet'
 import { snippetIdSchema } from '@/lib/validations'
 import { decompressContent } from '@/lib/compression'
-import clientPromise from '@/lib/mongodb'
+import connectDB from '@/lib/mongodb'
+
+// Define the lean document type
+interface SnippetLeanDocument {
+  _id: string
+  id: string
+  content: string
+  compressed: string
+  language: string
+  title?: string
+  createdAt: Date
+  expiresAt: Date
+  __v: number
+}
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Connect to MongoDB
-    await clientPromise
+    await connectDB()
 
-    // Validate ID
-    const { id } = snippetIdSchema.parse(params)
+    // Await params and then validate ID
+    const { id } = snippetIdSchema.parse(await params)
 
-    // Find snippet
-    const snippet = await Snippet.findOne({ id }).lean() as {
-      id: string
-      compressed: string
-      language: string
-      title: string
-      createdAt: Date
-      expiresAt: Date
-    } | null
+    // Find snippet with explicit typing
+    const snippet = await Snippet.findOne({ id }).lean() as SnippetLeanDocument | null
 
     if (!snippet) {
       return NextResponse.json(

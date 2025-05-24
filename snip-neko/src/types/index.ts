@@ -1,3 +1,4 @@
+import { Document } from 'mongoose'
 
 export interface Snippet {
   _id?: string
@@ -9,6 +10,9 @@ export interface Snippet {
   createdAt: Date
   expiresAt: Date
 }
+
+// Add Mongoose document interface
+export interface SnippetDocument extends Snippet, Document {}
 
 export interface CreateSnippetRequest {
   content: string

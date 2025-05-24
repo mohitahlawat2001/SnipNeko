@@ -3,19 +3,19 @@ import { nanoid } from 'nanoid'
 import { Snippet } from '@/models/Snippet'
 import { createSnippetSchema } from '@/lib/validations'
 import { compressContent } from '@/lib/compression'
-import clientPromise from '@/lib/mongodb'
+import connectDB from '@/lib/mongodb'
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to MongoDB
-    await clientPromise
+    // Connect to MongoDB with improved connection
+    await connectDB()
 
     // Parse and validate request body
     const body = await request.json()
     const validatedData = createSnippetSchema.parse(body)
 
     // Generate unique ID
-    const id = nanoid(10) // 10 character ID
+    const id = nanoid(10)
 
     // Compress content
     const compressed = compressContent(validatedData.content)

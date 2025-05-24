@@ -1,6 +1,7 @@
 import mongoose, { Schema, model, models } from 'mongoose'
+import { SnippetDocument } from '@/types'
 
-const SnippetSchema = new Schema({
+const SnippetSchema = new Schema<SnippetDocument>({
   id: {
     type: String,
     required: true,
@@ -30,11 +31,8 @@ const SnippetSchema = new Schema({
   expiresAt: {
     type: Date,
     default: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
-    expires: 0 // MongoDB TTL - automatically delete when expiresAt is reached
+    expires: 0 // TTL index
   }
 })
 
-// Create indexes for better performance
-SnippetSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
-
-export const Snippet = models.Snippet || model('Snippet', SnippetSchema)
+export const Snippet = models.Snippet || model<SnippetDocument>('Snippet', SnippetSchema)
