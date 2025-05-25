@@ -11,7 +11,7 @@ export default function NotFound() {
           Snippet Not Found
         </h1>
         <p className="text-gray-600 mb-6">
-          This snippet doesn't exist or has expired. Snippets automatically expire after 24 hours.
+          This snippet doesn&apos;t exist or has expired. Snippets automatically expire after 24 hours.
         </p>
         <Link href="/">
           <Button className="w-full">

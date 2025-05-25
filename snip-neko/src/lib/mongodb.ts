@@ -7,7 +7,12 @@ if (!MONGODB_URI) {
 }
 
 // Global cache to prevent multiple connections during development
-let cached = (global as any).mongoose || { conn: null, promise: null }
+interface MongooseCache {
+  conn: typeof mongoose | null
+  promise: Promise<typeof mongoose> | null
+}
+
+const cached: MongooseCache = (global as typeof global & { mongoose?: MongooseCache }).mongoose || { conn: null, promise: null }
 
 async function connectDB() {
   if (cached.conn) {
@@ -39,7 +44,7 @@ async function connectDB() {
 
 // Cache the connection globally
 if (process.env.NODE_ENV === 'development') {
-  (global as any).mongoose = cached
+  (global as typeof global & { mongoose?: MongooseCache }).mongoose = cached
 }
 
 export default connectDB
